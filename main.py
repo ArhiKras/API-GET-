@@ -4,12 +4,16 @@ from http_client import get
 try:
     from country_info import get_country_info as get_full_country_info, display_country_info
     from short_country_info import get_country_info as get_short_country_info, display_short_country_info
+    from colorama import Fore, Style, init
+    init(autoreset=True)
 except ImportError as e:
     print(f"Ошибка импорта модулей: {e}")
     get_full_country_info = None
     display_country_info = None
     get_short_country_info = None
     display_short_country_info = None
+    Fore = None
+    Style = None
 
 
 def get_request(url, params=None, headers=None):
@@ -62,10 +66,17 @@ def get_random_dog():
     url = "https://dog.ceo/api/breeds/image/random"
     response = get(url)
     if response:
+        status_code = response.status_code
         data = response.json()
         if data.get('status') == 'success':
             image_url = data.get('message', '')
             print(f"\n=== Случайная собака ===")
+            # Вывод статус кода
+            if Fore and Style:
+                status_color = Fore.GREEN if 200 <= status_code < 300 else Fore.RED
+                print(f"{Fore.YELLOW}{Style.BRIGHT}HTTP Status Code:{Style.RESET_ALL} {status_color}{status_code}\n")
+            else:
+                print(f"HTTP Status Code: {status_code}\n")
             print(f"Ссылка на изображение: {image_url}")
             return image_url
         else:
